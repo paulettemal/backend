@@ -6,16 +6,16 @@ from datetime import datetime
 from firebase_admin import db
 
 class LandingAPI(APIView):
-	    
-    name = 'Landing API'
+    
+    name = 'malcolmLanding'
 
-    # Coloque el nombre de su colección en el Realtime Database
+    # Nombre de la colección en Firebase Realtime Database
     collection_name = 'votes'
 
     def get(self, request):
         # Referencia a la colección
         ref = db.reference(f'{self.collection_name}')
-		    
+        
         # Obtiene todos los elementos de la colección
         votes = ref.get()
 
@@ -26,22 +26,23 @@ class LandingAPI(APIView):
         # Referencia a la colección
         ref = db.reference(f'{self.collection_name}')
 
+        # Genera la fecha y hora actual en el formato deseado
         current_time = datetime.now()
         custom_format = current_time.strftime("%d/%m/%Y, %I:%M:%S %p").lower().replace('am', 'a. m.').replace('pm', 'p. m.')
+
+        # Agrega el timestamp al objeto de datos enviado
         request.data.update({"saved": custom_format })
-	        
-        # Guarda el objeto en la colección
+        
+        # Guarda el objeto en Firebase
         new_resource = ref.push(request.data)
-	        
-        # Devuelve el id del objeto guardado
+        
+        # Devuelve el ID del recurso creado
         return Response({"id": new_resource.key}, status=status.HTTP_201_CREATED)
     
-
 
 class LandingAPIDetail(APIView):
 
     name = 'Landing Detail API'
-    
     collection_name = 'votes'
     
     def get(self, request, pk):
@@ -51,7 +52,6 @@ class LandingAPIDetail(APIView):
             return Response(document, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Documento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-
 
     def put(self, request, pk):
         ref = db.reference(f'{self.collection_name}/{pk}')
@@ -63,7 +63,6 @@ class LandingAPIDetail(APIView):
             return Response({"message": "Documento actualizado"}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Documento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-
 
     def delete(self, request, pk):
         ref = db.reference(f'{self.collection_name}/{pk}')
